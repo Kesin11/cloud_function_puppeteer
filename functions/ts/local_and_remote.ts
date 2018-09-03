@@ -18,7 +18,7 @@ class Dispatcher {
   }
 }
 
-class RemotePage {
+class RemoteFoo {
   dispatcher: Dispatcher
   url: string
   constructor(dispatcher: Dispatcher) {
@@ -34,7 +34,7 @@ class RemotePage {
   }
 }
 
-class Page2 {
+class Foo {
   public url: string
   constructor() {
     this.url = ''
@@ -54,12 +54,12 @@ const createLocalPage = (dispatcher: Dispatcher) => {
     }
   }
 
-  const page = new Page2()
+  const page = new Foo()
   return new Proxy(page, handler)
 }
 
 const dispatcher = new Dispatcher()
-const remotePage = new RemotePage(dispatcher)
+const remotePage = new RemoteFoo(dispatcher)
 const localPage = createLocalPage(dispatcher)
 localPage.goto('http://www.example.com', '/suffix/')
 
