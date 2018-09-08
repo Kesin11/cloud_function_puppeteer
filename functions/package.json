@@ -1,6 +1,8 @@
 {
   "name": "functions",
-  "engines": { "node": "8" },
+  "engines": {
+    "node": "8"
+  },
   "scripts": {
     "lint": "tslint --project tsconfig.json",
     "build": "tsc",
@@ -17,7 +19,8 @@
     "firebase-admin": "6.0.0",
     "firebase-functions": "2.0.5",
     "puppeteer": "1.7.0",
-    "ts-node": "7.0.1"
+    "ts-node": "7.0.1",
+    "websocket": "1.0.26"
   },
   "devDependencies": {
     "tslint": "~5.11.0",
