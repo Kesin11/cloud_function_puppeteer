@@ -24,14 +24,9 @@ wsServer.on('request', function(request: any) {
   const connection = request.accept('echo-protocol', request.origin);
   console.log((new Date()) + ' Connection accepted.');
   connection.on('message', function(message: any) {
-      console.log('on message')
       if (message.type === 'utf8') {
           console.log('Received Message: ' + message.utf8Data);
           connection.sendUTF(message.utf8Data);
-      }
-      else if (message.type === 'binary') {
-          console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-          connection.sendBytes(message.binaryData);
       }
   });
   connection.on('close', function(reasonCode: string, description: string) {
