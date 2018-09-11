@@ -5,6 +5,12 @@ export class RelayClient {
     connection?: any
     sendReady?: Promise<boolean>
 
+    constructor() {
+        this.client = new WebSocketClient();
+        this.connection = undefined
+        this.sendReady = undefined
+    }
+
     static async connect(url: string, protocol: string) {
         const instance = new RelayClient()
 
@@ -24,11 +30,6 @@ export class RelayClient {
         // instance.client.on('connect')によってconnectionがセットされるまで待つ
         await instance.sendReady
         return instance
-    }
-    constructor() {
-        this.client = new WebSocketClient();
-        this.connection = undefined
-        this.sendReady = undefined
     }
 
     onConnectionFailed(error) {
