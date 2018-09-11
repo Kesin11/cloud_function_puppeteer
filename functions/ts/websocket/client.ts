@@ -33,33 +33,28 @@ export class RelayClient {
     }
 
     onConnectionFailed(error) {
-        console.log('Connect Error: ' + error.toString());
+        console.log('[Client] Connect Error: ' + error.toString());
     }
 
     onConnect(connection) {
-        console.log('WebSocket Client Connected');
+        console.log('[Client] WebSocket Client Connected');
         connection.on('error', function(error) {
-            console.log("Connection Error: " + error.toString());
+            console.log("[Client] Connection Error: " + error.toString());
         })
         connection.on('close', function() {
-            console.log('echo-protocol Connection Closed');
+            console.log('[Client]: echo-protocol Connection Closed');
         })
         connection.on('message', function(message) {
             if (message.type === 'utf8') {
-                console.log("Received: '" + message.utf8Data + "'");
+                console.log("[Client] received: '" + message.utf8Data + "'");
             }
         })
     }
 
     send(message: string) {
         if (this.connection.connected) {
+            console.log(`[Client] send: ${message}`)
             this.connection.sendUTF(message)
         }
     }
 }
-
-const main = async () => {
-    const client = await RelayClient.connect('ws://localhost:8080/', 'echo-protocol')
-    client.send('send message')
-}
-main()

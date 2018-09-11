@@ -15,12 +15,12 @@ export class RelayServer {
   static start() {
     const instance = new RelayServer({port: 8080, protocol: 'echo-protocol'})
     instance.server = http.createServer(function(request, response) {
-      console.log((new Date()) + ' Received request for ' + request.url);
+      console.log('[Server] ' + (new Date()) + ' Received request for ' + request.url);
       response.writeHead(404);
       response.end();
     });
     instance.server.listen(instance.port, function() {
-      console.log((new Date()) + ' Server is listening on port 8080');
+      console.log('[Server] ' + (new Date()) + ' Server is listening on port 8080');
     });
 
     const wsServer = new WebSocketServer({
@@ -40,21 +40,16 @@ export class RelayServer {
   onConnection(request) {
     // TODO: thisにインスタンスがbindされていないのでthis.protocolが使えない。あとで考える
     const connection = request.accept('echo-protocol', request.origin);
-    console.log((new Date()) + ' Connection accepted.');
+    console.log('[Server] ' + (new Date()) + ' Connection accepted.');
 
     connection.on('message', (message: any) => {
       if (message.type === 'utf8') {
-          console.log('Received Message: ' + message.utf8Data);
+          console.log(`[Server] received Message: '${message.utf8Data}'`);
           connection.sendUTF(message.utf8Data);
       }
     })
     connection.on('close', (reasonCode: string, description: string) => {
-      console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+      console.log('[Server] ' + (new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
     })
   }
 }
-
-const main = () =>{
-  const server = RelayServer.start()
-}
-main()
