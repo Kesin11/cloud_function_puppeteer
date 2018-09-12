@@ -1,5 +1,7 @@
 import * as functions from 'firebase-functions';
 import puppeteer from 'puppeteer'
+import { RelayClient } from './websocket/client'
+import { RelayServer } from './websocket/server'
 
 export const launchPuppeteer = functions
   .runWith({ timeoutSeconds: 120, memory: '512MB'})
@@ -13,4 +15,12 @@ export const launchPuppeteer = functions
     })
     const browserWSEndpoint = browser.wsEndpoint()
     console.log(browserWSEndpoint)
+})
+
+export const relay_exp = functions
+  .https.onRequest(async (request, response) => {
+    const server = await RelayServer.start()
+
+    const client = await RelayClient.connect('ws://localhost:8080/', 'echo-protocol')
+    client.send('send message')
 })
