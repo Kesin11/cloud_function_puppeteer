@@ -11,7 +11,7 @@ export class RelayClient {
         this.sendReady = undefined
     }
 
-    static async connect(url: string, protocol: string) {
+    static async connect(url: string) {
         const instance = new RelayClient()
 
         instance.sendReady = new Promise((resolve, reject) => {
@@ -25,7 +25,7 @@ export class RelayClient {
                 resolve()
             })
         })
-        instance.client.connect(url, protocol)
+        instance.client.connect(url)
 
         // instance.client.on('connect')によってconnectionがセットされるまで待つ
         await instance.sendReady
@@ -42,7 +42,7 @@ export class RelayClient {
             console.log("[Client] Connection Error: " + error.toString());
         })
         connection.on('close', function() {
-            console.log('[Client]: echo-protocol Connection Closed');
+            console.log('[Client]: Connection Closed');
         })
         connection.on('message', function(message) {
             if (message.type === 'utf8') {

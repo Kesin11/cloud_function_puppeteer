@@ -5,7 +5,7 @@ import { RelayServer } from './websocket/server'
 const main = async() => {
   const server = await RelayServer.start()
 
-  const client = await RelayClient.connect('ws://localhost:8080/', 'echo-protocol')
+  const client = await RelayClient.connect('ws://localhost:8080/')
   client.send('send message')
 }
 main()

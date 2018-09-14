@@ -4,16 +4,14 @@ import http from 'http'
 export class RelayServer {
   server?: http.Server
   port: number
-  protocol: string
 
-  constructor({port, protocol}: {port: number, protocol: string}) {
+  constructor({port}: {port: number}) {
     this.server = undefined
     this.port = port
-    this.protocol = protocol
   }
 
   static start() {
-    const instance = new RelayServer({port: 8080, protocol: 'echo-protocol'})
+    const instance = new RelayServer({port: 8080})
     instance.server = http.createServer(function(request, response) {
       console.log('[Server] ' + (new Date()) + ' Received request for ' + request.url);
       response.writeHead(404);
@@ -38,8 +36,7 @@ export class RelayServer {
   }
 
   onConnection(request) {
-    // TODO: thisにインスタンスがbindされていないのでthis.protocolが使えない。あとで考える
-    const connection = request.accept('echo-protocol', request.origin);
+    const connection = request.accept(request.origin);
     console.log('[Server] ' + (new Date()) + ' Connection accepted.');
 
     connection.on('message', (message: any) => {
