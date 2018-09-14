@@ -40,8 +40,9 @@ export class RelayServer {
     console.log('[Server] ' + (new Date()) + ' Connection accepted.');
 
     connection.on('message', (message: any) => {
+      console.log('[Server] received Message: ')
+      console.dir(message)
       if (message.type === 'utf8') {
-          console.log(`[Server] received Message: '${message.utf8Data}'`);
           connection.sendUTF(message.utf8Data);
       }
     })
