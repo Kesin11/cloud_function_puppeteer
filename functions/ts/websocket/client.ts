@@ -20,6 +20,7 @@ export class RelayClient {
                 reject()
             })
             instance.client.on('connect', (connection) => {
+                console.log(`[client] connect to ${url}`)
                 instance.connection = connection
                 instance.onConnect(connection)
                 resolve()
@@ -53,7 +54,8 @@ export class RelayClient {
 
     send(message: string) {
         if (this.connection.connected) {
-            console.log(`[Client] send: ${message}`)
+            console.log(`[Client] send:`)
+            console.dir(message)
             this.connection.sendUTF(message)
         }
     }

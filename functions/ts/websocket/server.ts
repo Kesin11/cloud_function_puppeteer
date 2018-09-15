@@ -4,22 +4,24 @@ import http from 'http'
 export class RelayServer {
   server?: http.Server
   port: number
+  onMessage?: Function
 
   constructor({port}: {port: number}) {
     this.server = undefined
     this.port = port
+    this.onMessage = undefined
   }
 
-  static start() {
-    const instance = new RelayServer({port: 8080})
+  static start({port}: {port: number}) {
+    const instance = new RelayServer({port})
     instance.server = http.createServer(function(request, response) {
-      console.log('[Server] ' + (new Date()) + ' Received request for ' + request.url);
-      response.writeHead(404);
-      response.end();
-    });
+      console.log('[Server] ' + (new Date()) + ' Received request for ' + request.url)
+      response.writeHead(404)
+      response.end()
+    })
     instance.server.listen(instance.port, function() {
-      console.log('[Server] ' + (new Date()) + ' Server is listening on port 8080');
-    });
+      console.log(`[Server] ${new Date()} Server is listening on port ${port}`)
+    })
 
     const wsServer = new WebSocketServer({
       httpServer: instance.server,
@@ -30,7 +32,7 @@ export class RelayServer {
       // to accept it.
       // autoAcceptConnections: true
     });
-    wsServer.on('request', instance.onConnection)
+    wsServer.on('request', instance.onConnection.bind(instance))
 
     return instance
   }
@@ -42,12 +44,18 @@ export class RelayServer {
     connection.on('message', (message: any) => {
       console.log('[Server] received Message: ')
       console.dir(message)
-      if (message.type === 'utf8') {
-          connection.sendUTF(message.utf8Data);
-      }
+      // 外から差し込んだonMessageのcallbackを呼び出す
+      if ( this.onMessage ) this.onMessage(message)
+      // if (message.type === 'utf8') {
+      //     connection.sendUTF(message.utf8Data);
+      // }
     })
     connection.on('close', (reasonCode: string, description: string) => {
       console.log('[Server] ' + (new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
     })
+  }
+
+  async setOnMessage(callback: Function) {
+    this.onMessage = callback
   }
 }
