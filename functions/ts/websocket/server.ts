@@ -45,7 +45,7 @@ export class RelayServer {
       console.log('[Server] received Message: ')
       console.dir(message)
       // 外から差し込んだonMessageのcallbackを呼び出す
-      if ( this.onMessage ) this.onMessage(message)
+      if ( this.onMessage ) this.onMessage(message, connection)
       // if (message.type === 'utf8') {
       //     connection.sendUTF(message.utf8Data);
       // }
@@ -55,7 +55,7 @@ export class RelayServer {
     })
   }
 
-  async setOnMessage(callback: Function) {
+  setOnMessage(callback: Function) {
     this.onMessage = callback
   }
 }

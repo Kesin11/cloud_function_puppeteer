@@ -22,14 +22,18 @@ export class Relay {
     // serverにmessageが送られてきたらclientにそのまま流す
     // clientへの返信はそのままserverから返す
     // puppeteer.connectはsendでbrowserContextIdを取ろうとしているらしい
-
-    // TODO: client.sendでpuppeteerに同じ内容を送っているはずだけど、なぜかConnection Closedになる？
-
-    await server.setOnMessage((message: any) => {
-      console.log('[Relay] callback onMessage')
-      if (message.type === 'utf8') {
-        client.send(message)
+    server.setOnMessage((serverMessage: any, serverConnection: any) => {
+      console.log('[Relay] callback server.onMessage')
+      // serverで受け付けたmessageをclientの接続先にrelayする
+      if (serverMessage.type === 'utf8') {
+        client.send(serverMessage)
       }
+
+      // clientの接続先からの返信をserverの接続元にrelayする
+      client.setOnMessage((clientMessage: any) => {
+        console.log('[Relay] callback client.onMessage')
+        serverConnection.sendUTF(clientMessage.utf8Data)
+      })
     })
 
     const instance = new Relay({relayTo, port, server, client})

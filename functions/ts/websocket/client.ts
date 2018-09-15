@@ -4,6 +4,7 @@ export class RelayClient {
     client: any
     connection?: any
     sendReady?: Promise<boolean>
+    onMessage?: Function
 
     constructor() {
         this.client = new WebSocketClient();
@@ -39,24 +40,30 @@ export class RelayClient {
 
     onConnect(connection) {
         console.log('[Client] WebSocket Client Connected');
-        connection.on('error', function(error) {
+        connection.on('error', (error) => {
             console.log("[Client] Connection Error: " + error.toString());
         })
-        connection.on('close', function() {
+        connection.on('close', () => {
             console.log('[Client]: Connection Closed');
         })
-        connection.on('message', function(message) {
+        connection.on('message', (message) => {
+            console.log("[Client] received: '" + message.utf8Data + "'");
             if (message.type === 'utf8') {
-                console.log("[Client] received: '" + message.utf8Data + "'");
+                if (this.onMessage) this.onMessage(message)
             }
         })
     }
 
-    send(message: string) {
+    // TODO: messageは後でインターフェースを作っておく
+    send(message: any) {
         if (this.connection.connected) {
             console.log(`[Client] send:`)
             console.dir(message)
-            this.connection.sendUTF(message)
+            this.connection.sendUTF(message.utf8Data)
         }
+    }
+
+    setOnMessage(callback: Function) {
+        this.onMessage = callback
     }
 }

@@ -22,6 +22,7 @@ const localclient_to_puppeteer = async() => {
 
 const puppeteer_relay = async() => {
   const remoteBrowser = await puppeteer.launch({
+    headless: false,
     args: ['--no-sandbox', '--remote-debugging-port=9222']
   })
   const browserWSEndpoint = remoteBrowser.wsEndpoint()
@@ -29,11 +30,13 @@ const puppeteer_relay = async() => {
   const relay = await Relay.start({relayTo: browserWSEndpoint, port: 8080})
 
   const clientBrowser = await puppeteer.connect({ browserWSEndpoint: relay.endpoint })
-  console.log('after connect')
-
 
   const page = await clientBrowser.newPage()
-  await page.goto('http://www.google.com')
+  await page.goto('https://www.google.com/')
+
+  console.log('---------------')
+  console.log(page.url())
+  console.log('---------------')
 }
 
 // puppeteer_to_localserver()
