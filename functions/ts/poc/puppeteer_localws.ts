@@ -21,8 +21,9 @@ const localclient_to_puppeteer = async() => {
 }
 
 const puppeteer_relay = async() => {
+  const isDebug = process.env.NODE_ENV !== 'production'
   const remoteBrowser = await puppeteer.launch({
-    headless: false,
+    headless: isDebug ? false : true,
     args: ['--no-sandbox', '--remote-debugging-port=9222']
   })
   const browserWSEndpoint = remoteBrowser.wsEndpoint()

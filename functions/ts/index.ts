@@ -1,7 +1,6 @@
 import * as functions from 'firebase-functions';
 import puppeteer from 'puppeteer'
-import { RelayClient } from './websocket/client'
-import { RelayServer } from './websocket/server'
+import { Relay } from './websocket/relay';
 
 export const launchPuppeteer = functions
   .runWith({ timeoutSeconds: 120, memory: '512MB'})
@@ -18,9 +17,23 @@ export const launchPuppeteer = functions
 })
 
 export const relay_exp = functions
+  .runWith({ timeoutSeconds: 120, memory: '512MB'})
   .https.onRequest(async (request, response) => {
-    const server = await RelayServer.start()
+    const isDebug = process.env.NODE_ENV !== 'production'
+    const remoteBrowser = await puppeteer.launch({
+      headless: isDebug ? false : true,
+      args: ['--no-sandbox', '--remote-debugging-port=9222']
+    })
+    const browserWSEndpoint = remoteBrowser.wsEndpoint()
 
-    const client = await RelayClient.connect('ws://localhost:8080/', 'echo-protocol')
-    client.send('send message')
+    const relay = await Relay.start({relayTo: browserWSEndpoint, port: 8080})
+
+    const clientBrowser = await puppeteer.connect({ browserWSEndpoint: relay.endpoint })
+
+    const page = await clientBrowser.newPage()
+    await page.goto('https://www.google.com/')
+
+    console.log('---------------')
+    console.log(page.url())
+    console.log('---------------')
 })
