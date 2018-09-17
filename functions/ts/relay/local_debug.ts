@@ -23,8 +23,8 @@ export class LocalDebugRelay implements Relay {
     server.setOnMessage((serverMessage: IMessage, serverConnection: connection) => {
       console.log('[Relay] callback server.onMessage')
       // serverで受け付けたmessageをclientの接続先にrelayする
-      if (serverMessage.type === 'utf8') {
-        client.send(serverMessage)
+      if (serverMessage.type === 'utf8' && serverMessage.utf8Data) {
+        client.send(serverMessage.utf8Data)
       }
 
       // clientの接続先からの返信をserverの接続元にrelayする
