@@ -1,10 +1,10 @@
 import puppeteer from 'puppeteer'
-import { RelayServer } from '../websocket/server'
-import { RelayClient } from '../websocket/client';
-import { LocalDebugRelay } from '../relay/relay';
+import { WebsocketRelayServer } from '../websocket/server'
+import { WebsocketRelayClient } from '../websocket/client';
+import { LocalDebugRelay } from '../relay/local_debug';
 
 const puppeteer_to_localserver = async() => {
-  const server = RelayServer.start({port: 8080})
+  const server = WebsocketRelayServer.start({port: 8080})
 
   const browser = await puppeteer.connect({ browserWSEndpoint: 'ws://localhost:8080' })
 }
@@ -16,7 +16,7 @@ const localclient_to_puppeteer = async() => {
   const browserWSEndpoint = browser.wsEndpoint()
   console.log({browserWSEndpoint})
 
-  const client = await RelayClient.connect(browserWSEndpoint)
+  const client = await WebsocketRelayClient.connect(browserWSEndpoint)
   client.send('foo')
 }
 

@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import puppeteer from 'puppeteer'
-import { Relay } from './websocket/relay';
+import { LocalDebugRelay } from './relay/relay';
 
 export const launchPuppeteer = functions
   .runWith({ timeoutSeconds: 120, memory: '512MB'})
@@ -26,7 +26,7 @@ export const relay_exp = functions
     })
     const browserWSEndpoint = remoteBrowser.wsEndpoint()
 
-    const relay = await Relay.start({relayTo: browserWSEndpoint, port: 8080})
+    const relay = await LocalDebugRelay.start({relayTo: browserWSEndpoint, port: 8080})
 
     const clientBrowser = await puppeteer.connect({ browserWSEndpoint: relay.endpoint })
 

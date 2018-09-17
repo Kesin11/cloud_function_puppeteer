@@ -1,8 +1,8 @@
 import { server as WebSocketServer } from 'websocket'
 import http from 'http'
-import { Server } from '../relay/relay';
+import { RelayServer } from '../relay/relay';
  
-export class RelayServer implements Server {
+export class WebsocketRelayServer implements RelayServer {
   server?: http.Server
   port: number
   onMessage?: Function
@@ -16,7 +16,7 @@ export class RelayServer implements Server {
   }
 
   static start({port}: {port: number}) {
-    const instance = new RelayServer({port})
+    const instance = new WebsocketRelayServer({port})
     instance.server = http.createServer(function(request, response) {
       console.log('[Server] ' + (new Date()) + ' Received request for ' + request.url)
       response.writeHead(404)

@@ -1,7 +1,7 @@
 import { client as WebSocketClient } from 'websocket'
-import { Client } from '../relay/relay';
+import { RelayClient } from '../relay/relay';
  
-export class RelayClient implements Client {
+export class WebsocketRelayClient implements RelayClient {
     client: any
     connection?: any
     sendReady?: Promise<boolean>
@@ -14,7 +14,7 @@ export class RelayClient implements Client {
     }
 
     static async connect(url: string) {
-        const instance = new RelayClient()
+        const instance = new WebsocketRelayClient()
 
         instance.sendReady = new Promise((resolve, reject) => {
             instance.client.on('connectFailed', (error) => {
