@@ -16,10 +16,10 @@
   "main": "js/index.js",
   "dependencies": {
     "@google-cloud/pubsub": "0.20.0",
-    "@types/puppeteer": "1.6.1",
+    "@types/puppeteer": "1.6.4",
     "firebase-admin": "6.0.0",
     "firebase-functions": "2.0.5",
-    "puppeteer": "1.7.0",
+    "puppeteer": "1.8.0-next.1536951103472",
     "ts-node": "7.0.1",
     "websocket": "1.0.26"
   },
