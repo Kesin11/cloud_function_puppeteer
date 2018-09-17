@@ -1,15 +1,18 @@
 import { server as WebSocketServer } from 'websocket'
 import http from 'http'
+import { Server } from '../relay/relay';
  
-export class RelayServer {
+export class RelayServer implements Server {
   server?: http.Server
   port: number
   onMessage?: Function
+  endpoint: string
 
   constructor({port}: {port: number}) {
     this.server = undefined
     this.port = port
     this.onMessage = undefined
+    this.endpoint = `ws://localhost:${port}`
   }
 
   static start({port}: {port: number}) {

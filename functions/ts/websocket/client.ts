@@ -1,6 +1,7 @@
 import { client as WebSocketClient } from 'websocket'
+import { Client } from '../relay/relay';
  
-export class RelayClient {
+export class RelayClient implements Client {
     client: any
     connection?: any
     sendReady?: Promise<boolean>

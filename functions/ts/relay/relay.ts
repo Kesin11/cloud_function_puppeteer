@@ -1,16 +1,27 @@
-import { RelayServer } from "./server";
-import { RelayClient } from "./client";
+import { RelayServer } from "../websocket/server";
+import { RelayClient } from "../websocket/client";
 
-export class Relay {
-  relayTo: string
+export interface Relay {
+  server: Server
+  client: Client
   endpoint: string
+}
+
+export interface Server {
+  endpoint: string
+  setOnMessage: (callback: () => void) => void
+}
+
+export interface Client {
+  setOnMessage: (callback: () => void) => void
+}
+
+export class LocalDebugRelay implements Relay {
   server: RelayServer
   client: RelayClient
 
-  constructor({relayTo, port, server, client}:
+  constructor({server, client}:
     {relayTo: string, port: number, server: RelayServer, client: RelayClient}) {
-    this.relayTo = relayTo
-    this.endpoint = `ws://localhost:${port}`
     this.server = server
     this.client = client
   }
@@ -36,7 +47,11 @@ export class Relay {
       })
     })
 
-    const instance = new Relay({relayTo, port, server, client})
+    const instance = new LocalDebugRelay({relayTo, port, server, client})
     return instance
+  }
+
+  get endpoint() {
+    return this.server.endpoint
   }
 }
