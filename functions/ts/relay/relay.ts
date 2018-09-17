@@ -11,4 +11,5 @@ export interface RelayServer {
 
 export interface RelayClient {
   setOnMessage: (callback: () => void) => void
+  send: (message: string) => void
 }

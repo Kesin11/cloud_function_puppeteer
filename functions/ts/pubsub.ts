@@ -1,16 +1,28 @@
 import PubSub from '@google-cloud/pubsub'
+import { RelayClient } from './relay/relay';
 
-class CloudPubSub {
+export interface Event {
+  id: string
+  ackId: string
+  data: string
+  attributes: [string]
+  timestamp: string
+  ack: () => void
+  nack: () => void
+}
+
+export class CloudPubSub implements RelayClient {
   pubsub: PubSub
   topic: string
   subscription: any
   onMessage?: Function
+  publish = this.send.bind(this)
 
   static async create() {
     const instance = new CloudPubSub()
     const readyPromise = new Promise((resolve) => {
       // subscription.onによってhandleMessageがセットされるまで待つ
-      instance.subscription.on('message', (message) => {
+      instance.subscription.on('message', (message: Event) => {
         instance.handleMessage(message)
         resolve()
       })
@@ -27,7 +39,7 @@ class CloudPubSub {
     this.onMessage = undefined
   }
 
-  async publish(data) {
+  async send(data: string) {
     const dataBuffer = Buffer.from(data)
 
     try {
@@ -42,7 +54,7 @@ class CloudPubSub {
     }
   }
 
-  handleMessage(message) {
+  handleMessage(message: Event) {
     if (this.onMessage) {
       console.log(`[pubsub] handleMessage ${message.id}`)
       this.onMessage(message)
@@ -56,15 +68,15 @@ class CloudPubSub {
   }
 }
 
-const main = async () => {
-  const pubsub = await CloudPubSub.create()
+// const main = async () => {
+//   const pubsub = await CloudPubSub.create()
 
-  // このブロックがメッセージ受診時に実行される
-  pubsub.setOnMessage((message) => {
-    const data = JSON.parse(message.data)
-    console.log('callback: %o', data)
-  })
+//   // このブロックがメッセージ受診時に実行される
+//   pubsub.setOnMessage((message) => {
+//     const data = JSON.parse(message.data)
+//     console.log('callback: %o', data)
+//   })
 
-  pubsub.publish(JSON.stringify({id: 1, message: 'test hogehoge'}))
-}
-main()
+//   pubsub.publish(JSON.stringify({id: 1, message: 'test hogehoge'}))
+// }
+// main()
