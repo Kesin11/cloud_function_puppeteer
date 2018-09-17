@@ -10,32 +10,31 @@ export class LocalRelay implements Relay {
   client: CloudPubSub
 
   constructor({server, client}:
-    {port: number, server: WebsocketRelayServer, client: CloudPubSub}) {
+    {server: WebsocketRelayServer, client: CloudPubSub}) {
     this.server = server
     this.client = client
   }
 
   static async start({port}: {port: number}) {
     const server = WebsocketRelayServer.start({port})
-    const client = await CloudPubSub.create()
+    const client = await CloudPubSub.create({topic: 'local2remote', subscription: 'remote2local_puppeteer'})
 
     // websocket
     server.setOnMessage((serverMessage: IMessage, serverConnection: connection) => {
-      console.log('[Relay] callback server.onMessage')
+      console.log('[LocalRelay] callback server.onMessage')
       if (serverMessage.type === 'utf8' && serverMessage.utf8Data) {
         client.send(serverMessage.utf8Data)
       }
 
       // pubsub
-      // TODO: clientがsendしているのとhandleしているトピックが同一なので、送ったそばから受け取ってackしてしまっている
-      // sendするときと、handleするときのtopicを分ける必要がある
       client.setOnMessage((clientMessage: Event) => {
-        console.log('[Relay] callback client.onMessage')
+        console.log(`[LocalRelay] ---- callback client.onMessage message.id ${clientMessage.id} ----`)
+        if (!clientMessage.data) console.error(`[LocalRelay] ERROR!!! clientMessage.data null`)
         serverConnection.sendUTF(clientMessage.data)
       })
     })
 
-    const instance = new LocalRelay({port, server, client})
+    const instance = new LocalRelay({server, client})
     return instance
   }
 

@@ -11,32 +11,30 @@ export interface Event {
   nack: () => void
 }
 
+type PubSubTopic = 'local2remote' | 'remote2local'
+
 export class CloudPubSub implements RelayClient {
   pubsub: PubSub
-  topic: string
+  topic: PubSubTopic
   subscription: any
   onMessage?: Function
   publish = this.send.bind(this)
+  subscript: string // for debug
 
-  static async create() {
-    const instance = new CloudPubSub()
-    const readyPromise = new Promise((resolve) => {
-      // subscription.onによってhandleMessageがセットされるまで待つ
-      instance.subscription.on('message', (message: Event) => {
-        instance.handleMessage(message)
-        resolve()
-      })
+  static async create({topic, subscription}: {topic: PubSubTopic, subscription: string}) {
+    const instance = new CloudPubSub({topic, subscription})
+    instance.subscription.on('message', (message: Event) => {
+      instance.handleMessage(message)
     })
-
-    await readyPromise
     return instance
   }
 
-  constructor() {
+  constructor({topic, subscription}: {topic: PubSubTopic, subscription: string}) {
     this.pubsub = new PubSub()
-    this.topic = 'puppeteer-ws'
-    this.subscription = this.pubsub.subscription('puppeteer-ws-sub')
+    this.topic = topic
+    this.subscription = this.pubsub.subscription(subscription)
     this.onMessage = undefined
+    this.subscript = subscription
   }
 
   async send(data: string) {
@@ -48,7 +46,7 @@ export class CloudPubSub implements RelayClient {
         .publisher()
         .publish(dataBuffer)
       
-      console.log(`[pubsub] publish messageId: ${messageId}, ${data}`)
+      console.log(`[pubsub] publish topic: ${this.topic} messageId: ${messageId}, ${data}`)
     } catch (error) {
       console.error(`[pubsub] ERROR: ${error}`)
     }
@@ -56,7 +54,7 @@ export class CloudPubSub implements RelayClient {
 
   handleMessage(message: Event) {
     if (this.onMessage) {
-      console.log(`[pubsub] handleMessage ${message.id}`)
+      console.log(`[pubsub] handleMessage subscript: ${this.subscript} messageId: ${message.id}`)
       this.onMessage(message)
 
       message.ack()
@@ -67,16 +65,3 @@ export class CloudPubSub implements RelayClient {
     this.onMessage = callback
   }
 }
-
-// const main = async () => {
-//   const pubsub = await CloudPubSub.create()
-
-//   // このブロックがメッセージ受診時に実行される
-//   pubsub.setOnMessage((message) => {
-//     const data = JSON.parse(message.data)
-//     console.log('callback: %o', data)
-//   })
-
-//   pubsub.publish(JSON.stringify({id: 1, message: 'test hogehoge'}))
-// }
-// main()

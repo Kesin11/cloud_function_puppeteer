@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import puppeteer from 'puppeteer'
-import { LocalDebugRelay } from './relay/relay';
+import { LocalDebugRelay } from './relay/local_debug';
 
 export const launchPuppeteer = functions
   .runWith({ timeoutSeconds: 120, memory: '512MB'})

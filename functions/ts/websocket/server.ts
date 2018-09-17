@@ -45,13 +45,9 @@ export class WebsocketRelayServer implements RelayServer {
     console.log('[Server] ' + (new Date()) + ' Connection accepted.');
 
     connection.on('message', (message: any) => {
-      console.log('[Server] received Message: ')
-      console.dir(message)
+      console.log(`[Server] ---- received Message: ${message.utf8Data} ----`)
       // 外から差し込んだonMessageのcallbackを呼び出す
       if ( this.onMessage ) this.onMessage(message, connection)
-      // if (message.type === 'utf8') {
-      //     connection.sendUTF(message.utf8Data);
-      // }
     })
     connection.on('close', (reasonCode: string, description: string) => {
       console.log('[Server] ' + (new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');

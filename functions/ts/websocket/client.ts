@@ -55,12 +55,10 @@ export class WebsocketRelayClient implements RelayClient {
         })
     }
 
-    // TODO: messageは後でインターフェースを作っておく
-    send(message: any) {
+    send(message: string) {
         if (this.connection.connected) {
-            console.log(`[Client] send:`)
-            console.dir(message)
-            this.connection.sendUTF(message.utf8Data)
+            console.log(`[Client] send: ${message}`)
+            this.connection.sendUTF(message)
         }
     }
 
