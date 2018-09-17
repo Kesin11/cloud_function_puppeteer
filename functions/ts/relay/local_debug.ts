@@ -1,6 +1,7 @@
 import { Relay } from "./relay";
 import { WebsocketRelayServer } from "../websocket/server";
 import { WebsocketRelayClient } from "../websocket/client";
+import { IMessage, connection } from "websocket";
 
 export class LocalDebugRelay implements Relay {
   server: WebsocketRelayServer
@@ -19,7 +20,7 @@ export class LocalDebugRelay implements Relay {
     // serverにmessageが送られてきたらclientにそのまま流す
     // clientへの返信はそのままserverから返す
     // puppeteer.connectはsendでbrowserContextIdを取ろうとしているらしい
-    server.setOnMessage((serverMessage: any, serverConnection: any) => {
+    server.setOnMessage((serverMessage: IMessage, serverConnection: connection) => {
       console.log('[Relay] callback server.onMessage')
       // serverで受け付けたmessageをclientの接続先にrelayする
       if (serverMessage.type === 'utf8') {
@@ -27,9 +28,9 @@ export class LocalDebugRelay implements Relay {
       }
 
       // clientの接続先からの返信をserverの接続元にrelayする
-      client.setOnMessage((clientMessage: any) => {
+      client.setOnMessage((clientMessage: IMessage) => {
         console.log('[Relay] callback client.onMessage')
-        serverConnection.sendUTF(clientMessage.utf8Data)
+        if (clientMessage.utf8Data) serverConnection.sendUTF(clientMessage.utf8Data)
       })
     })
 
