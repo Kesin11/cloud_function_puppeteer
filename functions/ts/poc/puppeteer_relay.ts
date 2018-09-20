@@ -24,31 +24,28 @@ const main = async() => {
   console.log('[index] puppeteer.connect')
   const clientBrowser = await puppeteer.connect({ browserWSEndpoint: localRelay.endpoint })
 
-  const page = await clientBrowser.newPage()
+  const pages = await clientBrowser.pages()
+  const page = pages[0]
   await page.goto('http://www.example.com/')
   const title = await page.$eval('h1', (el: any) => el.innerText)
   console.log(`[index] title: ${title}`)
 
   // await page.goto('https://www.google.com/', {waitUntil: 'networkidle0'})
   await page.goto('https://www.google.com/', { waitUntil: "domcontentloaded"})
-  console.log(page.url())
   await page.type("#lst-ib", "test")
   await page.$eval('#tsf', (el: any) => el.submit())
-  console.log('[index] waitForNavigation')
-  await page.waitForNavigation()
   console.log('[index] page.eval')
   const urls = await page.$$eval('h3.r > a', (elList: any) => {
     return elList.map((el) => el.href)
   })
-  await page.goto('http://www.example.com/')
+  await page.goto('https://cloud.google.com/')
   console.log('---------------')
   console.log(urls)
   console.log('---------------')
 
-  // TODO:
-  // もしかするとpubsubで同じメッセージが2回送られている？
-  // とりあえずhashで同じmessage.idが2回来ていないかを見てみる
-  // 雑な対策としてはif messageId > lastMessageIdだけど、多少順番が崩れる可能性もあるので実際にはもっと真面目に対策した方がいい
-  // last 100ぐらいを保存するhashにすればメモリ的にも問題なさそう？
+  console.log('[index] page close')
+  await page.close()
+  console.log('[index] browser close')
+  await clientBrowser.close()
 }
 main()

@@ -58,6 +58,7 @@ export class CloudPubSub implements RelayClient {
       console.log(`[pubsub] handleMessage subscript: ${this.subscript} messageId: ${message.id}`)
       this.onMessage(message)
 
+      console.log(`[pubsub] ack messageId: ${message.id}`)
       message.ack()
     }
   }
