@@ -3,6 +3,8 @@ import { WebsocketRelayServer } from "../websocket/server";
 import { CloudPubSub, Event } from "../pubsub";
 import { IMessage, connection } from "websocket";
 
+const counter = {}
+
 // in: WebSocket
 // out: PubSub
 export class LocalRelay implements Relay {
@@ -28,6 +30,14 @@ export class LocalRelay implements Relay {
 
       // pubsub
       client.setOnMessage((clientMessage: Event) => {
+      if (counter[clientMessage.id]) {
+        counter[clientMessage.id] += 1
+        console.log(`[LocalRelay] WARNING: ${clientMessage.id} called ${counter[clientMessage.id]} times!!!`)
+        return
+      }
+      else {
+        counter[clientMessage.id] = 1
+      }
         console.log(`[LocalRelay] ---- callback client.onMessage message.id ${clientMessage.id} ----`)
         if (!clientMessage.data) console.error(`[LocalRelay] ERROR!!! clientMessage.data null`)
         serverConnection.sendUTF(clientMessage.data)

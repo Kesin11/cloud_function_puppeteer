@@ -48,7 +48,7 @@ export class WebsocketRelayClient implements RelayClient {
             console.log('[Client]: Connection Closed');
         })
         connection.on('message', (message) => {
-            console.log("[Client] received: '" + message.utf8Data + "'");
+            // console.log("[Client] received: '" + message.utf8Data + "'");
             if (message.type === 'utf8') {
                 if (this.onMessage) this.onMessage(message)
             }

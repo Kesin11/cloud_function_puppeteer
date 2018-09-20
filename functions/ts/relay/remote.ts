@@ -3,6 +3,8 @@ import { CloudPubSub, Event } from "../pubsub";
 import { IMessage, connection } from "websocket";
 import { WebsocketRelayClient } from "../websocket/client";
 
+const counter = {}
+
 // in: PubSub
 // out: WebSocket
 export class RemoteRelay implements Relay {
@@ -24,6 +26,15 @@ export class RemoteRelay implements Relay {
     // pubsub
     server.setOnMessage((serverMessage: Event) => {
       console.log(`[RemoteRelay] callback server.setOnMessage message.id ${serverMessage.id}`)
+
+      if (counter[serverMessage.id]) {
+        counter[serverMessage.id] += 1
+        console.log(`[RemoteRelay] WARNING: ${serverMessage.id} called ${counter[serverMessage.id]} times!!!`)
+      }
+      else {
+        counter[serverMessage.id] = 1
+      }
+
       client.send(serverMessage.data)
 
       // websocket

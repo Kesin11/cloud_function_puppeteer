@@ -46,7 +46,8 @@ export class CloudPubSub implements RelayClient {
         .publisher()
         .publish(dataBuffer)
       
-      console.log(`[pubsub] publish topic: ${this.topic} messageId: ${messageId}, ${data}`)
+      // console.log(`[pubsub] publish topic: ${this.topic} messageId: ${messageId}, ${data}`)
+      console.log(`[pubsub] publish topic: ${this.topic} messageId: ${messageId}`)
     } catch (error) {
       console.error(`[pubsub] ERROR: ${error}`)
     }
