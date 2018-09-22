@@ -6,15 +6,17 @@ export class WebsocketRelayClient implements RelayClient {
     connection?: any
     sendReady?: Promise<boolean>
     onMessage?: Function
+    delay: number
 
-    constructor() {
+    constructor({delay}: {delay?: number}) {
         this.client = new WebSocketClient();
         this.connection = undefined
         this.sendReady = undefined
+        this.delay = delay || 100
     }
 
-    static async connect(url: string) {
-        const instance = new WebsocketRelayClient()
+    static async connect(url: string, delay?: number) {
+        const instance = new WebsocketRelayClient({delay})
 
         instance.sendReady = new Promise((resolve, reject) => {
             instance.client.on('connectFailed', (error) => {
@@ -47,8 +49,10 @@ export class WebsocketRelayClient implements RelayClient {
         connection.on('close', () => {
             console.log('[Client]: Connection Closed');
         })
-        connection.on('message', (message) => {
+        connection.on('message', async (message) => {
             // console.log("[Client] received: '" + message.utf8Data + "'");
+            // for stabilize puppeteer
+            await new Promise((resolve) => setTimeout(resolve, this.delay))
             if (message.type === 'utf8') {
                 if (this.onMessage) this.onMessage(message)
             }
@@ -57,7 +61,7 @@ export class WebsocketRelayClient implements RelayClient {
 
     send(message: string) {
         if (this.connection.connected) {
-            console.log(`[Client] send: ${message}`)
+            console.log(`[Client] send method: ${JSON.parse(message).method}`)
             this.connection.sendUTF(message)
         }
     }

@@ -49,6 +49,7 @@ export class WebsocketRelayServer implements RelayServer {
 
     conn.on('message', (message) => {
       console.log(`[Server] ---- received Message: ${message.utf8Data} ----`)
+      // console.log(`[Server] ---- received Message: ----`)
       // 外から差し込んだonMessageのcallbackを呼び出す
       if ( this.onMessage ) this.onMessage(message, conn)
     })

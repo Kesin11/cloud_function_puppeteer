@@ -70,10 +70,10 @@ export class RemoteRelayWebsocket implements Relay {
     const client = await WebsocketRelayClient.connect(relayUrl)
 
     // from local server
-    server.setOnMessage((serverMessage: IMessage, serverConnection: connection) => {
+    server.setOnMessage((serverMessage: IMessage, _serverConnection: connection) => {
       console.log(`[RemoteRelay] callback server.setOnMessage`)
       if (serverMessage.type === 'utf8' && serverMessage.utf8Data) {
-        server.send(serverMessage.utf8Data)
+        client.send(serverMessage.utf8Data)
       }
 
       // from remote puppeteer
