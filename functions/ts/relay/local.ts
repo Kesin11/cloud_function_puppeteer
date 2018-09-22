@@ -7,7 +7,7 @@ const counter = {}
 
 // in: WebSocket
 // out: PubSub
-export class LocalRelay implements Relay {
+export class LocalRelayPubsub implements Relay {
   server: WebsocketRelayServer
   client: CloudPubSub
 
@@ -44,7 +44,7 @@ export class LocalRelay implements Relay {
       })
     })
 
-    const instance = new LocalRelay({server, client})
+    const instance = new LocalRelayPubsub({server, client})
     return instance
   }
 
