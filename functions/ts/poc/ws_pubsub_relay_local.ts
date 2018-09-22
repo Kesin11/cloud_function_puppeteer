@@ -1,10 +1,10 @@
 import puppeteer from 'puppeteer'
-import { LocalRelay } from "../relay/local";
+import { LocalRelayPubsub } from "../relay/local";
 
 const main = async() => {
   // local relay
   console.log('[index] LocalRelay.start')
-  const localRelay = await LocalRelay.start({port: 8080})
+  const localRelay = await LocalRelayPubsub.start({port: 8080})
 
   // local puppeteer
   console.log('[index] puppeteer.connect')

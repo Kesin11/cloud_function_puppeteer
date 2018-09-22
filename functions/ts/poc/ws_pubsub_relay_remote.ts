@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer'
-import { RemoteRelay } from '../relay/remote';
+import { RemoteRelayPubsub } from '../relay/remote';
 
 const main = async() => {
   // remote puppeteer
@@ -13,6 +13,6 @@ const main = async() => {
 
   // remote relay
   console.log('[index] RemoteRelay.start')
-  const remoteRelay = await RemoteRelay.start({relayUrl: browserWSEndpoint})
+  const remoteRelay = await RemoteRelayPubsub.start({relayUrl: browserWSEndpoint})
 }
 main()

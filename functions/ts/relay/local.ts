@@ -52,3 +52,44 @@ export class LocalRelayPubsub implements Relay {
     return this.server.endpoint
   }
 }
+
+// in: WebSocket server
+// out: WebSocket server
+export class LocalRelayWebsocket implements Relay {
+  server: WebsocketRelayServer
+  client: WebsocketRelayServer
+
+  constructor({server, client}:
+    {server: WebsocketRelayServer, client: WebsocketRelayServer}) {
+    this.server = server
+    this.client = client
+  }
+
+  static async start({serverPort, clientPort}: {serverPort: number, clientPort: number}) {
+    const server = WebsocketRelayServer.start({port: serverPort})
+    const client = WebsocketRelayServer.start({port: clientPort})
+
+    // from local puppeteer
+    server.setOnMessage((serverMessage: IMessage, serverConnection: connection) => {
+      console.log('[LocalRelay] callback server.onMessage')
+      if (serverMessage.type === 'utf8' && serverMessage.utf8Data) {
+        client.send(serverMessage.utf8Data)
+      }
+
+      // from remote server
+      client.setOnMessage((clientMessage: IMessage) => {
+        console.log(`[LocalRelay] ---- callback client.onMessage} ----`)
+        if (clientMessage.type === 'utf8' && clientMessage.utf8Data) {
+          serverConnection.sendUTF(clientMessage.utf8Data)
+        }
+      })
+    })
+
+    const instance = new LocalRelayWebsocket({server, client})
+    return instance
+  }
+
+  get endpoint() {
+    return this.server.endpoint
+  }
+}

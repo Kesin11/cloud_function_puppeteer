@@ -50,3 +50,42 @@ export class RemoteRelayPubsub implements Relay {
     return instance
   }
 }
+
+// in: WebSocket client
+// out: WebSocket client
+export class RemoteRelayWebsocket implements Relay {
+  server: WebsocketRelayClient
+  client: WebsocketRelayClient
+
+  constructor({server, client}:
+    {server: WebsocketRelayClient, client: WebsocketRelayClient}) {
+    this.server = server
+    this.client = client
+  }
+
+  static async start({relayUrl, localServerUrl}: {relayUrl: string, localServerUrl: string}) {
+    console.log('[RemoteRelay] connect to local server')
+    const server = await WebsocketRelayClient.connect(localServerUrl)
+    console.log('[RemoteRelay] connect to remote puppeteer')
+    const client = await WebsocketRelayClient.connect(relayUrl)
+
+    // from local server
+    server.setOnMessage((serverMessage: IMessage, serverConnection: connection) => {
+      console.log(`[RemoteRelay] callback server.setOnMessage`)
+      if (serverMessage.type === 'utf8' && serverMessage.utf8Data) {
+        server.send(serverMessage.utf8Data)
+      }
+
+      // from remote puppeteer
+      client.setOnMessage((clientMessage: IMessage, _clientConnection: connection) => {
+        console.log('[RemoteRelay] callback client.onMessage')
+        if (clientMessage.type === 'utf8' && clientMessage.utf8Data) {
+          server.send(clientMessage.utf8Data)
+        }
+      })
+    })
+
+    const instance = new RemoteRelayWebsocket({server, client})
+    return instance
+  }
+}

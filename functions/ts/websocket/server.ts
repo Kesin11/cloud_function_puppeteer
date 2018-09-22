@@ -1,4 +1,4 @@
-import { server as WebSocketServer } from 'websocket'
+import { server as WebSocketServer, request, connection} from 'websocket'
 import http from 'http'
 import { RelayServer } from '../relay/relay';
  
@@ -7,20 +7,22 @@ export class WebsocketRelayServer implements RelayServer {
   port: number
   onMessage?: Function
   endpoint: string
+  _connection?: connection
 
   constructor({port}: {port: number}) {
     this.server = undefined
     this.port = port
     this.onMessage = undefined
     this.endpoint = `ws://localhost:${port}`
+    this._connection = undefined
   }
 
   static start({port}: {port: number}) {
     const instance = new WebsocketRelayServer({port})
-    instance.server = http.createServer(function(request, response) {
-      console.log('[Server] ' + (new Date()) + ' Received request for ' + request.url)
-      response.writeHead(404)
-      response.end()
+    instance.server = http.createServer(function(req, res) {
+      console.log('[Server] ' + (new Date()) + ' Received request for ' + req.url)
+      res.writeHead(404)
+      res.end()
     })
     instance.server.listen(instance.port, function() {
       console.log(`[Server] ${new Date()} Server is listening on port ${port}`)
@@ -40,21 +42,28 @@ export class WebsocketRelayServer implements RelayServer {
     return instance
   }
 
-  onConnection(request) {
-    const connection = request.accept(request.origin);
+  onConnection(req: request) {
+    const conn = req.accept(req.origin);
+    this._connection = conn
     console.log('[Server] ' + (new Date()) + ' Connection accepted.');
 
-    connection.on('message', (message: any) => {
+    conn.on('message', (message) => {
       console.log(`[Server] ---- received Message: ${message.utf8Data} ----`)
       // 外から差し込んだonMessageのcallbackを呼び出す
-      if ( this.onMessage ) this.onMessage(message, connection)
+      if ( this.onMessage ) this.onMessage(message, conn)
     })
-    connection.on('close', (reasonCode: string, description: string) => {
-      console.log('[Server] ' + (new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+    conn.on('close', (_reasonCode: number, _description: string) => {
+      console.log('[Server] ' + (new Date()) + ' Peer ' + conn.remoteAddress + ' disconnected.');
     })
   }
 
   setOnMessage(callback: Function) {
     this.onMessage = callback
+  }
+
+  send(message: string) {
+    if(this._connection === undefined) return
+
+    this._connection.sendUTF(message)
   }
 }
