@@ -1,7 +1,21 @@
 import puppeteer from 'puppeteer'
 import { LocalRelay } from "../relay/local";
+import { RemoteRelay } from '../relay/remote';
 
 const main = async() => {
+  // remote puppeteer
+  const isDebug = process.env.NODE_ENV !== 'production'
+  const remoteBrowser = await puppeteer.launch({
+    headless: isDebug ? false : true,
+    // slowMo: 5000,
+    args: ['--no-sandbox', '--remote-debugging-port=9222']
+  })
+  const browserWSEndpoint = remoteBrowser.wsEndpoint()
+
+  // remote relay
+  console.log('[index] RemoteRelay.start')
+  const remoteRelay = await RemoteRelay.start({relayUrl: browserWSEndpoint})
+
   // local relay
   console.log('[index] LocalRelay.start')
   const localRelay = await LocalRelay.start({port: 8080})
@@ -10,7 +24,8 @@ const main = async() => {
   console.log('[index] puppeteer.connect')
   const clientBrowser = await puppeteer.connect({ browserWSEndpoint: localRelay.endpoint })
 
-  const page = await clientBrowser.newPage()
+  const pages = await clientBrowser.pages()
+  const page = pages[0]
   await page.goto('http://www.example.com/')
   const title = await page.$eval('h1', (el: any) => el.innerText)
   console.log(`[index] title: ${title}`)
