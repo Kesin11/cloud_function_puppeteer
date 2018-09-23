@@ -8,6 +8,7 @@ export class WebsocketRelayServer implements RelayServer {
   onMessage?: Function
   endpoint: string
   _connection?: connection
+  ready?: Promise<void>
 
   constructor({port}: {port: number}) {
     this.server = undefined
@@ -15,6 +16,7 @@ export class WebsocketRelayServer implements RelayServer {
     this.onMessage = undefined
     this.endpoint = `ws://localhost:${port}`
     this._connection = undefined
+    this.ready = undefined
   }
 
   static start({port}: {port: number}) {
@@ -37,14 +39,21 @@ export class WebsocketRelayServer implements RelayServer {
       // to accept it.
       // autoAcceptConnections: true
     });
-    wsServer.on('request', instance.onConnection.bind(instance))
+
+    // clientが接続したときにPromiseを解決する
+    instance.ready = new Promise((resolve) => {
+      wsServer.on('connect', async () => {
+        console.log(`[Server] onConnect`)
+        resolve()
+      })
+    })
+    wsServer.on('request', instance.onRequest.bind(instance))
 
     return instance
   }
 
-  onConnection(req: request) {
+  onRequest(req: request) {
     const conn = req.accept(req.origin);
-    this._connection = conn
     console.log('[Server] ' + (new Date()) + ' Connection accepted.');
 
     conn.on('message', (message) => {
@@ -56,6 +65,8 @@ export class WebsocketRelayServer implements RelayServer {
     conn.on('close', (_reasonCode: number, _description: string) => {
       console.log('[Server] ' + (new Date()) + ' Peer ' + conn.remoteAddress + ' disconnected.');
     })
+
+    this._connection = conn
   }
 
   setOnMessage(callback: Function) {

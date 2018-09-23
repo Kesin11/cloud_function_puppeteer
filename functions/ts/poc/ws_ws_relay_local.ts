@@ -1,26 +1,13 @@
 import puppeteer from 'puppeteer'
 import { LocalRelayWebsocket } from "../relay/local";
-import { RemoteRelayWebsocket } from '../relay/remote';
 
 const main = async() => {
   // local relay
   console.log('[index] LocalRelay.start')
   const localRelay = await LocalRelayWebsocket.start({serverPort: 8080, clientPort: 8081})
 
-  // remote puppeteer
-  const isDebug = process.env.NODE_ENV !== 'production'
-  const remoteBrowser = await puppeteer.launch({
-    headless: isDebug ? false : true,
-    // slowMo: 5000,
-    args: ['--no-sandbox', '--remote-debugging-port=9222']
-  })
-  const browserWSEndpoint = remoteBrowser.wsEndpoint()
-
-  // remote relay
-  console.log('[index] RemoteRelay.start')
-  const remoteRelay = await RemoteRelayWebsocket.start({relayUrl: browserWSEndpoint, localServerUrl: localRelay.clientEndpoint})
-
   // wait for connect remote to local
+  console.log('[index] await LocalRelay ready')
   await localRelay.ready
 
   // local puppeteer

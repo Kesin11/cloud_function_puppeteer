@@ -100,4 +100,8 @@ export class LocalRelayWebsocket implements Relay {
   get clientEndpoint() {
     return this.client.endpoint
   }
+
+  get ready() {
+    return this.client.ready
+  }
 }
